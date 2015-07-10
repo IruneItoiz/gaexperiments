@@ -11,7 +11,7 @@ namespace GAExperiments;
 class Experiment {
     public function run() {
         add_action( 'init', array( $this, 'create_posttype' ) );
-        add_action('wp_head',  array ($this, 'experiment_js_code'));
+        add_action('wp_head',  array ($this, 'experiment_js_code'), 0);
     }
 
 
