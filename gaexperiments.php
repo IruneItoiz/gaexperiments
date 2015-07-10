@@ -38,11 +38,11 @@ function gaexperiments_init() {
 		'option_name' => 'gcaexperiments_option_name'
 	);
 	
-	$plugin['settings_page'] = function ( $plugin ) {
-        return new SettingsPage( $plugin['settings_page_properties'] );
-    };
+	//$plugin['settings_page'] = function ( $plugin ) {
+    //    return new SettingsPage( $plugin['settings_page_properties'] );
+    //};
 
-    $plugin['slides_cpt'] = function ( $plugin ) {
+    $plugin['experiment_cpt'] = function ( $plugin ) {
         return new Experiment( );
     };
 

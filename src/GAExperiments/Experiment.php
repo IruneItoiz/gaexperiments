@@ -11,6 +11,7 @@ namespace GAExperiments;
 class Experiment {
     public function run() {
         add_action( 'init', array( $this, 'create_posttype' ) );
+        add_action('wp_head',  array ($this, 'experiment_js_code'));
     }
 
 
@@ -78,7 +79,8 @@ class Experiment {
             add_meta_box( 'experiment-id', 'Experiments', array ($this, 'experiment_attributes_meta_box'), $page, 'side', 'high');
         }
 
-
+        //Register experiment code metabox on experiment
+        add_meta_box( 'experiment-jscode', 'Javascript Code For Experiment', array ($this, 'experiment_js_attributes_meta_box'), 'experiment', 'advanced', 'high');
     }
 
     function experiment_attributes_meta_box($post) {
@@ -89,6 +91,13 @@ class Experiment {
 
             echo $pages;
         } // end empty pages check
+    } // end hierarchical check.
+
+    function experiment_js_attributes_meta_box($post) {
+        $experiment_js_code = get_post_meta( $post->ID, '_experiment_js_code', true );
+
+        wp_nonce_field( 'save_experiment_id', 'experiment_id_nonce' );
+        echo '<textarea name="experiment_js_code" id="experiment_js_code" rows="5" cols="60" style="width:99%">'.$experiment_js_code.'</textarea>';
     } // end hierarchical check.
 
     // Save the Metabox Data
@@ -109,6 +118,7 @@ class Experiment {
         // We'll put it into an array to make it easier to loop though.
 
         $experiment_id = $_POST['experiment_id'];
+        $experiment_js_code = trim($_POST['experiment_js_code']);
         // Add values of $events_meta as custom fields
 
         if(get_post_meta($post->ID, '_experiment_id', FALSE)) { // If the custom field already has a value
@@ -117,10 +127,26 @@ class Experiment {
                 add_post_meta($post->ID, '_experiment_id', $experiment_id);
         }
         if(!$experiment_id) delete_post_meta($post->ID, '_experiment_id'); // Delete if blank
+
+        if(get_post_meta($post->ID, '_experiment_js_code', FALSE)) { // If the custom field already has a value
+            update_post_meta($post->ID, '_experiment_js_code',$experiment_js_code);
+        } else { // If the custom field doesn't have a value
+            add_post_meta($post->ID, '_experiment_js_code', $experiment_js_code);
+        }
+        if(!$experiment_js_code) delete_post_meta($post->ID, '_experiment_js_code'); // Delete if blank
     }
 
 
-
+    function experiment_js_code()
+    {
+        global $post;
+        $post_experiment = get_post_meta($post->ID, '_experiment_id', true);
+        if ($post_experiment)
+        {
+            $experiment_js_code = get_post_meta( $post_experiment, '_experiment_js_code', true );
+            echo "\n".$experiment_js_code."\n";
+        }
+    }
     function experiment_template( $original_template ) {
         global $post;
 
@@ -150,7 +176,7 @@ class Experiment {
 
                 if ($file_template)
                 {
-                    return get_template_directory() . '/'.$file_template;
+                    return get_stylesheet_directory(). '/'.$file_template;
                 }
             }
             return $original_template;
